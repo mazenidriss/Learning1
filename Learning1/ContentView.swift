@@ -10,6 +10,7 @@ import SwiftUI
 struct OnboardingView: View {
     @State private var currentIndex = 0
     @State private var gutHealthAnswer: String? = nil
+    @State private var bathroomAnswer: String? = nil
     
     var body: some View {
         TabView(selection: $currentIndex) {
@@ -30,14 +31,30 @@ struct OnboardingView: View {
             ResponseSlide(
                 answer: gutHealthAnswer,
                 onFinished: {
-                    withAnimation { currentIndex = 4 } // <-- move forward automatically
+                    withAnimation { currentIndex = 4 }
                 }
             )
             .tag(3)
             
-            // Placeholder for whatever comes after
-            Text("Next Slide After Response 🚀")
-                .tag(4)
+            BathroomRoutineSlide(
+                selectedOption: $bathroomAnswer,
+                onAnswered: {
+                    withAnimation { currentIndex = 5 }
+                }
+            )
+            .tag(4)
+            
+            ResponseSlide(
+                answer: bathroomAnswer,
+                onFinished: {
+                    withAnimation { currentIndex = 6 }
+                }
+            )
+            .tag(5)
+            
+            // Now we move forward after both responses
+            LoginView()
+                .tag(6)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color.green)
                 .ignoresSafeArea()
@@ -47,6 +64,8 @@ struct OnboardingView: View {
         .ignoresSafeArea()
     }
 }
+
+
 
 
 
@@ -186,6 +205,7 @@ struct ResponseSlide: View {
                 Spacer()
                 
                 if let answer = answer {
+                    // Gut health responses
                     if answer.contains("well-oiled") {
                         ResponseContent(
                             emoji: "💪",
@@ -200,6 +220,30 @@ struct ResponseSlide: View {
                         ResponseContent(
                             emoji: "😵‍💫",
                             message: "No worries. Turdly will guide you to better gut health."
+                        )
+                    }
+                    // Bathroom routine responses
+                    else if answer.contains("clockwork") {
+                        ResponseContent(
+                            emoji: "🕒",
+                            message: "Nice! Consistency is king 👑."
+                        )
+                    } else if answer.contains("over the place") {
+                        ResponseContent(
+                            emoji: "🎢",
+                            message: "We’ll help smooth things out 🧻."
+                        )
+                    } else if answer.contains("avoid talking") {
+                        ResponseContent(
+                            emoji: "🙈",
+                            message: "Fair enough! Turdly keeps things private 🤫."
+                        )
+                    }
+                    // Fallback
+                    else {
+                        ResponseContent(
+                            emoji: "🤔",
+                            message: "Interesting choice!"
                         )
                     }
                 } else {
@@ -224,6 +268,7 @@ struct ResponseSlide: View {
         }
     }
 }
+
 
 /// Helper view for the response
 struct ResponseContent: View {
@@ -286,6 +331,76 @@ struct HowItWorksStep: View {
         .cornerRadius(16)
     }
 }
+
+struct BathroomRoutineSlide: View {
+    @Binding var selectedOption: String?
+    var onAnswered: () -> Void
+    
+    let options: [SurveyOption] = [
+        SurveyOption(text: "Like clockwork", icon: "🕒"),
+        SurveyOption(text: "All over the place", icon: "🎢"),
+        SurveyOption(text: "I avoid talking about it", icon: "🙈")
+    ]
+    
+    var body: some View {
+        ZStack {
+            GradientBackground()
+            
+            VStack(spacing: 40) {
+                Text("How’s your bathroom routine?")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 40)
+                
+                VStack(spacing: 20) {
+                    ForEach(options) { option in
+                        Button(action: {
+                            withAnimation {
+                                selectedOption = option.text
+                                onAnswered()
+                            }
+                        }) {
+                            HStack(spacing: 20) {
+                                ZStack {
+                                    Circle()
+                                        .fill(selectedOption == option.text ? Color.white : Color.white.opacity(0.2))
+                                        .frame(width: 50, height: 50)
+                                    Text(option.icon)
+                                        .font(.title2)
+                                }
+                                
+                                Text(option.text)
+                                    .font(.headline)
+                                    .foregroundColor(selectedOption == option.text ? .white : .white.opacity(0.9))
+                                
+                                Spacer()
+                            }
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(selectedOption == option.text ? Color.white.opacity(0.3) : Color.white.opacity(0.15))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(selectedOption == option.text ? Color.white : Color.clear, lineWidth: 2)
+                            )
+                            .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 5)
+                        }
+                        .scaleEffect(selectedOption == option.text ? 1.05 : 1.0)
+                        .animation(.spring(), value: selectedOption)
+                    }
+                }
+                .padding(.horizontal, 30)
+                
+                Spacer()
+            }
+        }
+    }
+}
+
 
 struct SurveyOption: Identifiable {
     let id = UUID()
