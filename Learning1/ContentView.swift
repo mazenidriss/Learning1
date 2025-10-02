@@ -55,6 +55,7 @@ struct OnboardingView: View {
             // Now we move forward after both responses
             LoginView()
                 .tag(6)
+
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color.green)
                 .ignoresSafeArea()
@@ -407,6 +408,248 @@ struct SurveyOption: Identifiable {
     let text: String
     let icon: String
 }
+
+struct LoginView: View {
+    @State private var email: String = ""
+    @State private var password: String = ""
+    @State private var loggedIn = false
+    
+    var body: some View {
+        if loggedIn {
+            MainTabView() // 🚀 go to the real app after login
+        } else {
+            ZStack {
+                GradientBackground()
+                
+                VStack(spacing: 25) {
+                    Spacer()
+                    
+                    Text("🔐")
+                        .font(.system(size: 80))
+                    
+                    Text("Log in to Turdly")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                    
+                    VStack(spacing: 15) {
+                        TextField("Email", text: $email)
+                            .textInputAutocapitalization(.never)
+                            .padding()
+                            .background(Color.white.opacity(0.2))
+                            .cornerRadius(12)
+                            .foregroundColor(.white)
+                            .keyboardType(.emailAddress)
+                        
+                        SecureField("Password", text: $password)
+                            .padding()
+                            .background(Color.white.opacity(0.2))
+                            .cornerRadius(12)
+                            .foregroundColor(.white)
+                    }
+                    .padding(.horizontal, 30)
+                    
+                    Button(action: {
+                        withAnimation { loggedIn = true }
+                    }) {
+                        Text("Continue")
+                            .font(.headline)
+                            .foregroundColor(.orange)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.white)
+                            .cornerRadius(12)
+                    }
+                    .padding(.horizontal, 30)
+                    
+                    VStack(spacing: 15) {
+                        Button(action: {
+                            // Dummy Google sign-in
+                            withAnimation { loggedIn = true }
+                        }) {
+                            HStack {
+                                Image(systemName: "globe") // placeholder for Google logo
+                                    .font(.title2)
+                                Text("Sign in with Google")
+                                    .fontWeight(.semibold)
+                            }
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.red.opacity(0.8))
+                            .cornerRadius(12)
+                        }
+                        
+                        Button(action: {
+                            // Dummy Apple sign-in
+                            withAnimation { loggedIn = true }
+                        }) {
+                            HStack {
+                                Image(systemName: "applelogo")
+                                    .font(.title2)
+                                Text("Sign in with Apple")
+                                    .fontWeight(.semibold)
+                            }
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.black)
+                            .cornerRadius(12)
+                        }
+                    }
+                    .padding(.horizontal, 30)
+                    .padding(.top, 10)
+                    
+                    Spacer()
+                    
+                    Button("Create an account") {
+                        // TODO: Signup logic
+                    }
+                    .foregroundColor(.white.opacity(0.8))
+                    .padding(.bottom, 40)
+                }
+            }
+            .ignoresSafeArea()
+        }
+    }
+}
+
+
+struct MainTabView: View {
+    @State private var selectedTab = 2 // Start on middle tab ("Log")
+    
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            // Content based on selected tab
+            Group {
+                switch selectedTab {
+                case 0: HistoryView()
+                case 1: TrendsView()
+                case 2: LogView()
+                case 3: InsightsView()
+                case 4: ProfileView()
+                default: LogView()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.white.ignoresSafeArea())
+            
+            // Custom Gradient Tab Bar
+            HStack {
+                TabBarButton(icon: "clock", label: "History", isSelected: selectedTab == 0) {
+                    selectedTab = 0
+                }
+                
+                TabBarButton(icon: "chart.bar", label: "Trends", isSelected: selectedTab == 1) {
+                    selectedTab = 1
+                }
+                
+                TabBarButton(icon: "tortoise.fill", label: "Log", isSelected: selectedTab == 2) {
+                    selectedTab = 2
+                }
+                
+                TabBarButton(icon: "lightbulb", label: "Insights", isSelected: selectedTab == 3) {
+                    selectedTab = 3
+                }
+                
+                TabBarButton(icon: "person", label: "Profile", isSelected: selectedTab == 4) {
+                    selectedTab = 4
+                }
+            }
+            .padding(.vertical, 10)
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [.orange, .yellow]),
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .ignoresSafeArea(edges: .bottom)
+            )
+        }
+    }
+}
+
+/// Reusable tab button
+struct TabBarButton: View {
+    let icon: String
+    let label: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(isSelected ? .white : .white.opacity(0.7))
+                Text(label)
+                    .font(.caption2)
+                    .foregroundColor(isSelected ? .white : .white.opacity(0.7))
+            }
+            .frame(maxWidth: .infinity)
+        }
+    }
+}
+
+//
+// Placeholder views for tabs
+//
+struct HistoryView: View {
+    var body: some View {
+        Text("History 📜")
+            .font(.largeTitle)
+            .foregroundColor(.black)
+    }
+}
+
+struct TrendsView: View {
+    var body: some View {
+        Text("Trends 📊")
+            .font(.largeTitle)
+            .foregroundColor(.black)
+    }
+}
+
+struct LogView: View {
+    var body: some View {
+        VStack(spacing: 30) {
+            Text("Log 💩")
+                .font(.largeTitle)
+                .foregroundColor(.black)
+            
+            Button(action: {
+                // Add log action
+            }) {
+                Text("Snap a Photo 📸")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(maxWidth: 250)
+                    .background(Color.orange)
+                    .cornerRadius(16)
+                    .shadow(radius: 5)
+            }
+        }
+    }
+}
+
+struct InsightsView: View {
+    var body: some View {
+        Text("Insights 💡")
+            .font(.largeTitle)
+            .foregroundColor(.black)
+    }
+}
+
+struct ProfileView: View {
+    var body: some View {
+        Text("Profile 👤")
+            .font(.largeTitle)
+            .foregroundColor(.black)
+    }
+}
+
+
 
 #Preview {
     OnboardingView()
